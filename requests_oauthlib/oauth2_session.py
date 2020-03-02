@@ -5,6 +5,7 @@ import logging
 from oauthlib.common import generate_token, urldecode
 from oauthlib.oauth2 import WebApplicationClient, InsecureTransportError
 from oauthlib.oauth2 import LegacyApplicationClient
+from oauthlib.oauth2 import BackendApplicationClient
 from oauthlib.oauth2 import TokenExpiredError, is_secure_transport
 import requests
 
@@ -249,7 +250,7 @@ class OAuth2Session(requests.Session):
                 authorization_response, state=self._state
             )
             code = self._client.code
-        elif not code and isinstance(self._client, WebApplicationClient):
+        elif not code and not isinstance(self._client, BackendApplicationClient):
             code = self._client.code
             if not code:
                 raise ValueError(
@@ -511,7 +512,7 @@ class OAuth2Session(requests.Session):
                         token = self.fetch_token(
                             self.auto_refresh_url,
                             auth=auth,
-                            **dict(kwargs, **self.auto_refresh_kwargs),
+                            **self.auto_refresh_kwargs
                         )
                     else:
                         raise RuntimeError("Unknown auto_refresh_type: %s" % self.auto_refresh_type)
